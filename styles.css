@@ -1,0 +1,175 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f0f0f0;
+  font-family: 'Inter', sans-serif; /* Added Inter font */
+}
+
+/* Smartphone Frame */
+.smartphone {
+  position: relative;
+  width: 320px;
+  height: 600px;
+  background: black;
+  border-radius: 40px;
+  padding: 10px; /* Keep padding for inner margin */
+  display: flex;
+  flex-direction: column; /* Stack children vertically */
+  /* Removed justify-content/align-items here as children will manage their space */
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  overflow: hidden; /* Important to contain rounded corners */
+}
+
+/* Title Bar */
+.title-bar {
+  /* No longer absolute positioning */
+  width: 100%; /* Takes full width of parent's content area */
+  height: 50px; /* Fixed height for the title bar */
+  background: rgba(0, 0, 0, 1);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  z-index: 10; /* Ensure it stays on top */
+  /* Border radius only on top to match screen-container's radius */
+  border-top-left-radius: 30px;
+  border-top-right-radius: 30px;
+}
+
+/* Screen Container */
+.screen-container {
+  flex-grow: 1; /* Takes all available space after title-bar */
+  width: 100%; /* Takes full width of parent's content area */
+  overflow-y: scroll;
+  /*scroll-snap-type: y mandatory;
+  background: black;
+  border-radius: 30px; /* Match smartphone's inner radius */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer/Edge */
+  /* Ensure bottom radius matches smartphone's inner radius */
+  border-bottom-left-radius: 30px;
+  border-bottom-right-radius: 30px;
+}
+
+.screen-container::-webkit-scrollbar {
+  display: none;
+}
+
+.screen {
+  scroll-snap-align: start;
+  height: 100%; /* Each screen fills 100% of the screen-container's height */
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Removed duplicate .screen rule to avoid conflict */
+}
+
+/* Intro Screen Styles */
+.intro-box {
+  background-color: #000000;
+  height: 100%; /* Ensure intro screen fits smartphone height */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+}
+
+.intro-text h1 {
+  font-size: 2rem;
+  color: white;
+    margin-bottom: 1rem;
+  padding: 1rem;
+
+}
+
+.intro-text p {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  color: white;
+  padding: 1rem;
+
+}
+
+.next-btn {
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px; /* Added rounded corners */
+}
+
+.next-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Other screens like video and rating box styles */
+.video-box, .rating-box {
+  background-color: black;
+}
+
+video {
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.rating-box {
+  height: 100%;
+  background-color: black;
+  flex-direction: column;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rating-text {
+  color: white;
+  font-size: 20px;
+  margin-bottom: 15px;
+  text-align: center;
+  width: 100%;
+}
+
+.stars {
+  display: flex;
+  gap: 5px;
+}
+
+.star {
+  font-size: 30px;
+  color: gray;
+  cursor: pointer;
+}
+
+.star.selected {
+  color: gold;
+}
+
+.next-btn, .download-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 5px;
+}
+
+.next-btn:hover, .download-btn:hover {
+  background-color: #0056b3;
+}
