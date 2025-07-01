@@ -292,6 +292,11 @@ function downloadCSV() {
     const csvRows = ["Video ID,Video Rating,Purchase Likelihood,Viewing Duration (ms)"]; // Added duration column
     // Iterate over all videos to ensure all durations are included, even if not rated
     videos.forEach(video => {
+        videoBox.innerHTML = `
+    <video loop playsinline preload="auto"> // <--- Add preload="auto" or "metadata"
+        <source src="${video.src}" type="video/mp4">
+    </video>
+`;
         const videoId = video.id;
         const ratingData = ratings[videoId] || { videoRating: "N/A", purchaseLikelihood: "N/A" }; // Use "N/A" if no rating
         const duration = videoViewingDurations[videoId] ? videoViewingDurations[videoId].totalDuration : 0;
