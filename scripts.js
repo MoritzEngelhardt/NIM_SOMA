@@ -1,6 +1,6 @@
 const videos = [
-    { id: 1, src: "SOMA1.mp4" },
-    { id: 2, src: "SOMA2.mp4" },
+    { id: 1, src: "video_audio_1.mp4" },
+    { id: 2, src: "video_audio_2.mp4" },
     { id: 3, src: "video_audio_3.mp4" },
     { id: 4, src: "video_audio_4.mp4" }
 ];
