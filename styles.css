@@ -50,7 +50,8 @@ html, body {
 .screen-container {
   flex-grow: 1; /* Takes all available space after title-bar */
   width: 100%; /* Takes full width of parent's content area */
-  overflow-y: scroll;
+overflow-y: hidden;
+touch-action: none;
   /*scroll-snap-type: y mandatory;
   background: black;
   border-radius: 30px; /* Match smartphone's inner radius */
@@ -72,6 +73,8 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
+    flex-direction: column; /* 👈 For vertical stacking */
+
   /* Removed duplicate .screen rule to avoid conflict */
 }
 
@@ -172,4 +175,27 @@ video {
 
 .next-btn:hover, .download-btn:hover {
   background-color: #0056b3;
+}
+
+/* Drag cursor and text-selection lock */
+#videoContainer {
+  cursor: grab;
+  user-select: none;
+}
+
+#videoContainer.dragging {
+  cursor: grabbing;
+}
+
+body.dragging,
+.smartphone.dragging,
+#videoContainer.dragging,
+.screen.dragging,
+.intro-text.dragging,
+.intro-text * {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  cursor: grabbing;
 }
