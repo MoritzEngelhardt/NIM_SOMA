@@ -13,7 +13,46 @@ function shuffleArray(array) {
     }
 }
 
+
+function preloadVideos(videoList) {
+    videoList.forEach(video => {
+        const tempVideo = document.createElement('video');
+        tempVideo.src = video.src;
+        tempVideo.preload = 'auto';
+        tempVideo.muted = true;
+        tempVideo.playsInline = true;
+        tempVideo.style.display = 'none';
+
+        document.body.appendChild(tempVideo);
+        tempVideo.load();
+
+        // Remove from DOM once preloaded to free memory
+        tempVideo.oncanplaythrough = () => {
+            document.body.removeChild(tempVideo);
+            console.log(`✅ Preloaded: ${video.src}`);
+        };
+    });
+}
+
+function warmVideoCache(videoList) {
+    videoList.forEach(video => {
+        fetch(video.src, { method: 'GET', mode: 'cors' })
+            .then(response => {
+                if (!response.ok) throw new Error(`Failed to fetch ${video.src}`);
+                return response.blob();
+            })
+            .then(blob => {
+                console.log(`✅ Fetched to cache: ${video.src} (${(blob.size / 1024 / 1024).toFixed(2)} MB)`);
+            })
+            .catch(err => {
+                console.warn(`⚠️ Failed to preload ${video.src}`, err);
+            });
+    });
+}
+
 shuffleArray(videos);
+preloadVideos(videos); // 👈 Add this
+warmVideoCache(videos); // Optional backup
 
 const container = document.getElementById('videoContainer');
 const videoViewingDurations = {};
@@ -201,9 +240,10 @@ function downloadCSV() {
     const csvRows = ["Video ID,Video Rating,Purchase Likelihood,Viewing Duration (ms)"];
     videos.forEach(video => {
         const videoId = video.id;
+        const videoDesc = video.src;
         const ratingData = ratings[videoId] || { videoRating: "N/A", purchaseLikelihood: "N/A" };
         const duration = videoViewingDurations[videoId] ? videoViewingDurations[videoId].totalDuration : 0;
-        csvRows.push(`${videoId},${ratingData.videoRating},${ratingData.purchaseLikelihood},${duration}`);
+        csvRows.push(`${videoDesc};${ratingData.videoRating};${ratingData.purchaseLikelihood};${duration}`);
     });
 
     const blob = new Blob([csvRows.join("\n")], { type: 'text/csv' });
