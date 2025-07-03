@@ -199,3 +199,25 @@ body.dragging,
   -ms-user-select: none !important;
   cursor: grabbing;
 }
+
+.video-box {
+  position: relative;
+}
+
+.video-loading-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 6px solid rgba(255, 255, 255, 0.2);
+  border-top: 6px solid white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  z-index: 2;
+}
+
+@keyframes spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}

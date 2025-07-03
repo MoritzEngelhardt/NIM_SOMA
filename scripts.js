@@ -64,10 +64,11 @@ videos.forEach(video => {
     videoBox.classList.add("screen", "video-box");
     videoBox.setAttribute("data-video-id", video.id);
     videoBox.innerHTML = `
-      <video loop playsinline preload="auto">
-        <source src="${video.src}" type="video/mp4">
-      </video>
-    `;
+  <div class="video-loading-spinner"></div>
+  <video loop playsinline preload="auto">
+    <source src="${video.src}" type="video/mp4">
+  </video>
+`;
     container.appendChild(videoBox);
 
     const ratingBox = document.createElement("div");
@@ -98,6 +99,13 @@ videos.forEach(video => {
     container.appendChild(ratingBox);
 
     const videoElement = videoBox.querySelector("video");
+
+    const spinner = videoBox.querySelector(".video-loading-spinner");
+
+    videoElement.addEventListener("canplaythrough", () => {
+    if (spinner) spinner.style.display = "none";
+    });
+    
     videoElement.muted = false;
 
     const observer = new IntersectionObserver(
