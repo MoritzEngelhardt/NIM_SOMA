@@ -181,6 +181,7 @@ video {
 #videoContainer {
   cursor: grab;
   user-select: none;
+  overflow: hidden; 
 }
 
 #videoContainer.dragging {

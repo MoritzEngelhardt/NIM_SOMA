@@ -105,7 +105,7 @@ videos.forEach(video => {
     videoElement.addEventListener("canplaythrough", () => {
     if (spinner) spinner.style.display = "none";
     });
-    
+
     videoElement.muted = false;
 
     const observer = new IntersectionObserver(
@@ -177,7 +177,7 @@ function logVideoEnd(index) {
 
 let touchStartY = 0;
 let touchEndY = 0;
-let swipeThreshold = 50;
+let swipeThreshold = 30;
 
 container.addEventListener('touchstart', (e) => {
     touchStartY = e.changedTouches[0].clientY;
@@ -204,6 +204,30 @@ container.addEventListener('mouseup', (e) => {
         handleSwipeGesture();
     }
 });
+
+let scrollTimeout;
+let isScrolling = false;
+
+const SCROLL_THRESHOLD = 20; // Try 80–120 for less sensitive, 10–30 for more
+
+container.addEventListener('wheel', (e) => {
+    e.preventDefault();
+
+    if (isScrolling) return;
+
+    if (e.deltaY > SCROLL_THRESHOLD) {
+        isScrolling = true;
+        scrollToNext();
+    } else if (e.deltaY < -SCROLL_THRESHOLD) {
+        isScrolling = true;
+        scrollToPrevious();
+    }
+
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+        isScrolling = false;
+    }, 800); // adjust debounce delay if needed
+}, { passive: false });
 
 function handleSwipeGesture() {
     const swipeDistance = touchStartY - touchEndY;
