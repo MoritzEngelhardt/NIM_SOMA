@@ -134,6 +134,22 @@ videos.forEach(video => {
     );
 
     observer.observe(videoElement);
+
+    if (video.id === videos[0].id) {
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            const rect = videoElement.getBoundingClientRect();
+            const visibleRatio = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0);
+            const visibility = visibleRatio / rect.height;
+
+            if (visibility >= 0.8) {
+                videoElement.play().catch(err => {
+                    console.warn("Autoplay on first video failed:", err);
+                });
+            }
+        }, 100); // slight delay to allow layout to stabilize
+    });
+}
 });
 
 const summaryBox = document.createElement("div");
