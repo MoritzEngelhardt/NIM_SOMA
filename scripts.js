@@ -130,7 +130,7 @@ videos.forEach(video => {
                 }
             });
         },
-        { threshold: 0.8 }
+        { threshold: 0.6 }
     );
 
     observer.observe(videoElement);
