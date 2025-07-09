@@ -139,8 +139,11 @@ videos.forEach(video => {
 const summaryBox = document.createElement("div");
 summaryBox.classList.add("screen", "rating-box");
 summaryBox.innerHTML = `
-  <div class="rating-text">Thank you for rating all videos!</div>
+  <div class="rating-text">Thank you for rating all videos! Please download your results file. It will be saved in your Downloads folder. If youre done, click on the 'Finished' button.</div>
   <button class="download-btn">Download Ratings</button>
+   <a href="https://uk-erlangen.limesurvey.net/SOMA_part2" class="summary-link-button" target="_blank">
+    <button>Finished!</button>
+  </a>
 `;
 container.appendChild(summaryBox);
 
