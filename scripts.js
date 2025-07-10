@@ -75,7 +75,8 @@ videos.forEach(video => {
     ratingBox.classList.add("screen", "rating-box");
     ratingBox.setAttribute("data-video-id", video.id);
     ratingBox.innerHTML = `
-      <div class="rating-text">Please rate the quality of the video</div>
+    <div class="rating-text">Please rate the video you just saw:</div>
+      <div class="rating-text">Quality</div>
       <div class="stars" data-question="videoRating">
         <span class="star" data-value="1">★</span>
         <span class="star" data-value="2">★</span>
@@ -88,6 +89,30 @@ videos.forEach(video => {
       <div class="rating-text"> </div>
 
       <div class="rating-text">How much do you feel adressed?</div>
+      <div class="stars" data-question="purchaseLikelihood">
+        <span class="star" data-value="1">★</span>
+        <span class="star" data-value="2">★</span>
+        <span class="star" data-value="3">★</span>
+        <span class="star" data-value="4">★</span>
+        <span class="star" data-value="5">★</span>
+      </div>
+<div class="rating-text"> </div>
+      <div class="rating-text"> </div>
+      <div class="rating-text"> </div>
+      
+      <div class="rating-text">How emotionally affected are you?</div>
+      <div class="stars" data-question="purchaseLikelihood">
+        <span class="star" data-value="1">★</span>
+        <span class="star" data-value="2">★</span>
+        <span class="star" data-value="3">★</span>
+        <span class="star" data-value="4">★</span>
+        <span class="star" data-value="5">★</span>
+      </div>
+<div class="rating-text"> </div>
+      <div class="rating-text"> </div>
+      <div class="rating-text"> </div>
+      
+       <div class="rating-text">How much money are you willing to spend on the product/donate to the cause? (from 1 = "None" to 5 = "A lot")</div>
       <div class="stars" data-question="purchaseLikelihood">
         <span class="star" data-value="1">★</span>
         <span class="star" data-value="2">★</span>
