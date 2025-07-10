@@ -112,7 +112,7 @@ videos.forEach(video => {
       <div class="rating-text"> </div>
       <div class="rating-text"> </div>
       
-       <div class="rating-text">How much money are you willing to spend on the product/donate to the cause? (from 1 = "None" to 5 = "A lot")</div>
+       <div class="rating-text">How much money are you willing to spend on the product/donate to the cause? (from 1 = 'None' to 5 = 'A lot')</div>
       <div class="stars" data-question="purchaseLikelihood">
         <span class="star" data-value="1">★</span>
         <span class="star" data-value="2">★</span>
