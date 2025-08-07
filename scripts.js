@@ -15,12 +15,11 @@ const regularVideos = [
     { id: 10, src: "Soma_audio_MENTALHEALTH.mp4" }, // Note: different capitalization
     { id: 11, src: "SOMA_audio_Möbel.mp4" },
     { id: 12, src: "SOMA_audio_READING.mp4" },
-    { id: 13, src: "SOMA_audio_Rent.mp4" },
+    { id: 13, src: "SOMA_audio_Rent.mp4" }, //ERROR
     { id: 14, src: "SOMA_audio_SPORTDRINK.mp4" },
     { id: 15, src: "SOMA_audio_sportshoe.mp4" },
     { id: 16, src: "SOMA_audio_tea.mp4" },
-    { id: 17, src: "SOMA_audio_Vacation.mp4" },
-    { id: 18, src: "SOMA_audio_VeganBBQ.mp4" },
+    { id: 17, src: "SOMA_audio_vacation.mp4" }, //ERROR
     { id: 19, src: "SOMA_audio_VR.mp4" },
     { id: 20, src: "SOMA_audio_applejuice.mp4" },
     { id: 21, src: "SOMA_check.mp4"}
