@@ -22,7 +22,9 @@ const regularVideos = [
     { id: 17, src: "SOMA_audio_Vacation.mp4" },
     { id: 18, src: "SOMA_audio_VeganBBQ.mp4" },
     { id: 19, src: "SOMA_audio_VR.mp4" },
-    { id: 20, src: "SOMA_audio_applejuice.mp4" }
+    { id: 20, src: "SOMA_audio_applejuice.mp4" },
+    { id: 21, src: "SOMA_check.mp4"}
+
 ];
 
 // Shuffle-Funktion bleibt gleich
@@ -103,7 +105,7 @@ videos.forEach(video => {
     ratingBox.classList.add("screen", "rating-box");
     ratingBox.setAttribute("data-video-id", video.id);
     ratingBox.innerHTML = `
-      <div class="rating-text">Please rate the quality of the video</div>
+      <div class="rating-text">Quality:</div>
       <div class="stars" data-question="videoRating">
         <span class="star" data-value="1">★</span>
         <span class="star" data-value="2">★</span>
@@ -169,6 +171,8 @@ const summaryBox = document.createElement("div");
 summaryBox.classList.add("screen", "rating-box");
 summaryBox.innerHTML = `
   <div class="rating-text">Thank you for rating all videos!</div>
+  <div></div>
+    <div class="rating-text">IMPORTANT: Download the answer file using the button below.</div>
   <button class="download-btn">Download Ratings</button>
 `;
 container.appendChild(summaryBox);
