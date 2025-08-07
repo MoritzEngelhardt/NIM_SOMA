@@ -1,11 +1,32 @@
-const videos = [
-    { id: 1, src: "video_audio_1.mp4" },
-    { id: 2, src: "video_audio_2.mp4" },
-    { id: 3, src: "video_audio_3.mp4" },
-    { id: 4, src: "video_audio_4.mp4" }
+// Tutorial-Video als erstes definieren
+const tutorialVideo = { id: 0, src: "SOMA0_tutorial.mp4" };
+
+// Die anderen Videos (erweitert auf 20 Videos)
+const regularVideos = [
+    { id: 1, src: "SOMA1_applejuice_sound.mp4" },
+    { id: 2, src: "SOMA2_car_sound.mp4" },
+    { id: 3, src: "SOMA5_tea_sound.mp4" },
+    { id: 4, src: "SOMA9_sportshoe_sound.mp4" },
+    { id: 5, src: "SOMA15_everydayheroes_sound.mp4" },
+    { id: 6, src: "SOMA20_climatechange_sound.mp4" }
+    // ,
+    // { id: 7, src: "video_audio_7.mp4" },
+    // { id: 8, src: "video_audio_8.mp4" },
+    // { id: 9, src: "video_audio_9.mp4" },
+    // { id: 10, src: "video_audio_10.mp4" },
+    // { id: 11, src: "video_audio_11.mp4" },
+    // { id: 12, src: "video_audio_12.mp4" },
+    // { id: 13, src: "video_audio_13.mp4" },
+    // { id: 14, src: "video_audio_14.mp4" },
+    // { id: 15, src: "video_audio_15.mp4" },
+    // { id: 16, src: "video_audio_16.mp4" },
+    // { id: 17, src: "video_audio_17.mp4" },
+    // { id: 18, src: "video_audio_18.mp4" },
+    // { id: 19, src: "video_audio_19.mp4" },
+    // { id: 20, src: "video_audio_20.mp4" }
 ];
 
-
+// Shuffle-Funktion bleibt gleich
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         let j = Math.floor(Math.random() * (i + 1));
@@ -13,7 +34,7 @@ function shuffleArray(array) {
     }
 }
 
-
+// Preload-Funktion bleibt gleich
 function preloadVideos(videoList) {
     videoList.forEach(video => {
         const tempVideo = document.createElement('video');
@@ -34,6 +55,7 @@ function preloadVideos(videoList) {
     });
 }
 
+// Cache-Funktion bleibt gleich
 function warmVideoCache(videoList) {
     videoList.forEach(video => {
         fetch(video.src, { method: 'GET', mode: 'cors' })
@@ -50,10 +72,17 @@ function warmVideoCache(videoList) {
     });
 }
 
-shuffleArray(videos);
-preloadVideos(videos); // 👈 Add this
-warmVideoCache(videos); // Optional backup
+// Regular Videos shuffeln
+shuffleArray(regularVideos);
 
+// Videos-Array erstellen: Tutorial zuerst, dann shuffled regular videos
+const videos = [tutorialVideo, ...regularVideos];
+
+// Preload und Cache für alle Videos
+preloadVideos(videos);
+warmVideoCache(videos);
+
+// Der Rest des Codes bleibt unverändert
 const container = document.getElementById('videoContainer');
 const videoViewingDurations = {};
 
@@ -136,10 +165,13 @@ videos.forEach(video => {
     observer.observe(videoElement);
 });
 
+// Der restliche Code bleibt komplett unverändert...
 const summaryBox = document.createElement("div");
 summaryBox.classList.add("screen", "rating-box");
 summaryBox.innerHTML = `
   <div class="rating-text">Thank you for rating all videos!</div>
+  <div> </div>
+    <div class="rating-text">IMPORTANT: Download and save the answer file using the button below.</div>
   <button class="download-btn">Download Ratings</button>
 `;
 container.appendChild(summaryBox);
@@ -192,7 +224,7 @@ container.addEventListener('mousedown', (e) => {
     if (e.button === 0) {
         touchStartY = e.clientY;
         container.classList.add('dragging');
-        document.body.classList.add('dragging'); // 👈
+        document.body.classList.add('dragging');
     }
 });
 
@@ -200,7 +232,7 @@ container.addEventListener('mouseup', (e) => {
     if (e.button === 0) {
         touchEndY = e.clientY;
         container.classList.remove('dragging');
-        document.body.classList.remove('dragging'); // 👈
+        document.body.classList.remove('dragging');
         handleSwipeGesture();
     }
 });
@@ -208,7 +240,7 @@ container.addEventListener('mouseup', (e) => {
 let scrollTimeout;
 let isScrolling = false;
 
-const SCROLL_THRESHOLD = 20; // Try 80–120 for less sensitive, 10–30 for more
+const SCROLL_THRESHOLD = 20;
 
 container.addEventListener('wheel', (e) => {
     e.preventDefault();
@@ -226,7 +258,7 @@ container.addEventListener('wheel', (e) => {
     clearTimeout(scrollTimeout);
     scrollTimeout = setTimeout(() => {
         isScrolling = false;
-    }, 800); // adjust debounce delay if needed
+    }, 800);
 }, { passive: false });
 
 function handleSwipeGesture() {
