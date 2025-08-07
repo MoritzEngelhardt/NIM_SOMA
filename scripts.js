@@ -12,14 +12,14 @@ const regularVideos = [
     { id: 7, src: "SOMA_audio_DRUGS.mp4" },
     { id: 8, src: "SOMA_audio_everydayheroes.mp4" },
     { id: 9, src: "SOMA_audio_LAUNDRY.mp4" },
-    { id: 10, src: "Soma_audio_MENTALHEALTH.mp4" }, // Note: different capitalization
+    { id: 10, src: "Soma_audio_MENTALHEALTH.mp4" },
     { id: 11, src: "SOMA_audio_Möbel.mp4" },
     { id: 12, src: "SOMA_audio_READING.mp4" },
-    { id: 13, src: "SOMA_audio_Rent.mp4" }, //ERROR
+    { id: 13, src: "SOMA_audio_RENT.mp4" }, //ERROR
     { id: 14, src: "SOMA_audio_SPORTDRINK.mp4" },
     { id: 15, src: "SOMA_audio_sportshoe.mp4" },
     { id: 16, src: "SOMA_audio_tea.mp4" },
-    { id: 17, src: "SOMA_audio_vacation.mp4" }, //ERROR
+    { id: 17, src: "SOMA_audio_vacation.mp4" },
     { id: 19, src: "SOMA_audio_VR.mp4" },
     { id: 20, src: "SOMA_audio_applejuice.mp4" },
     { id: 21, src: "SOMA_check.mp4"}
@@ -104,7 +104,7 @@ videos.forEach(video => {
     ratingBox.classList.add("screen", "rating-box");
     ratingBox.setAttribute("data-video-id", video.id);
     ratingBox.innerHTML = `
-      <div class="rating-text">Quality:</div>
+      <div class="rating-text">Video quality?</div>
       <div class="stars" data-question="videoRating">
         <span class="star" data-value="1">★</span>
         <span class="star" data-value="2">★</span>
@@ -240,7 +240,7 @@ container.addEventListener('mouseup', (e) => {
 let scrollTimeout;
 let isScrolling = false;
 
-const SCROLL_THRESHOLD = 20;
+const SCROLL_THRESHOLD = 21;
 
 container.addEventListener('wheel', (e) => {
     e.preventDefault();
