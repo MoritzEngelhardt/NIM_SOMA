@@ -231,18 +231,30 @@ function createVideoElements() {
         videoBox.classList.add("screen", "video-box");
         videoBox.setAttribute("data-video-id", video.id);
         
-        // Verwende Blob-URL falls verfügbar, sonst Original-URL
         const cachedVideo = videoCache.get(video.id);
         const videoSrc = cachedVideo ? cachedVideo.blobUrl : video.src;
         
         videoBox.innerHTML = `
             <div class="video-loading-spinner" style="display: none;"></div>
-            <video loop playsinline preload="auto">
+            <video loop playsinline preload="auto" muted>
                 <source src="${videoSrc}" type="video/mp4">
             </video>
+            <div class="unmute-hint" style="
+                position: absolute; 
+                bottom: 20px; 
+                left: 20px; 
+                color: white; 
+                background: rgba(0,0,0,0.7); 
+                padding: 10px; 
+                border-radius: 5px; 
+                font-size: 14px;
+                display: none;
+                cursor: pointer;
+            ">🔇 Tap to enable sound</div>
         `;
         container.appendChild(videoBox);
 
+        // Rest der ratingBox bleibt gleich...
         const ratingBox = document.createElement("div");
         ratingBox.classList.add("screen", "rating-box");
         ratingBox.setAttribute("data-video-id", video.id);
@@ -297,11 +309,10 @@ function createVideoElements() {
         container.appendChild(ratingBox);
 
         const videoElement = videoBox.querySelector("video");
-        videoElement.muted = false;
-
-        // Verbesserte Video-Loading-Behandlung
+        const unmuteHint = videoBox.querySelector(".unmute-hint");
         const spinner = videoBox.querySelector(".video-loading-spinner");
         
+        // Verbesserte Event-Listeners
         videoElement.addEventListener("loadstart", () => {
             if (spinner) spinner.style.display = "block";
         });
@@ -318,6 +329,18 @@ function createVideoElements() {
             }
         });
 
+        // Click-to-unmute functionality
+        let hasUserInteracted = false;
+        
+        function enableSound() {
+            videoElement.muted = false;
+            hasUserInteracted = true;
+            if (unmuteHint) unmuteHint.style.display = "none";
+        }
+        
+        videoBox.addEventListener('click', enableSound);
+        unmuteHint.addEventListener('click', enableSound);
+
         const observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach(entry => {
@@ -325,17 +348,34 @@ function createVideoElements() {
                         const currentVideoId = videoElement.closest('.video-box').getAttribute('data-video-id');
 
                         if (entry.isIntersecting) {
-                            // Warten bis Video bereit ist
-                            if (videoElement.readyState >= 3) {
+                            // Zeige Unmute-Hint wenn nötig
+                            if (!hasUserInteracted && unmuteHint) {
+                                unmuteHint.style.display = "block";
+                                setTimeout(() => {
+                                    if (unmuteHint && unmuteHint.style.display === "block") {
+                                        unmuteHint.style.display = "none";
+                                    }
+                                }, 3000);
+                            }
+                            
+                            // Video abspielen (stumm oder mit Ton je nach User-Interaktion)
+                            const playVideo = () => {
                                 videoElement.play().catch(e => {
                                     console.error(`Play failed for video ${currentVideoId}:`, e);
+                                    // Bei Autoplay-Error, erneut stumm versuchen
+                                    if (!videoElement.muted) {
+                                        videoElement.muted = true;
+                                        videoElement.play().catch(err => {
+                                            console.error(`Muted play also failed:`, err);
+                                        });
+                                    }
                                 });
+                            };
+                            
+                            if (videoElement.readyState >= 3) {
+                                playVideo();
                             } else {
-                                videoElement.addEventListener('canplay', () => {
-                                    videoElement.play().catch(e => {
-                                        console.error(`Play failed for video ${currentVideoId}:`, e);
-                                    });
-                                }, { once: true });
+                                videoElement.addEventListener('canplay', playVideo, { once: true });
                             }
                             
                             if (videoViewingDurations[currentVideoId] && !videoViewingDurations[currentVideoId].lastStartTime) {
@@ -343,6 +383,8 @@ function createVideoElements() {
                             }
                         } else {
                             videoElement.pause();
+                            if (unmuteHint) unmuteHint.style.display = "none";
+                            
                             if (videoViewingDurations[currentVideoId] && videoViewingDurations[currentVideoId].lastStartTime) {
                                 const duration = Date.now() - videoViewingDurations[currentVideoId].lastStartTime;
                                 videoViewingDurations[currentVideoId].totalDuration += duration;
@@ -358,6 +400,7 @@ function createVideoElements() {
         observer.observe(videoElement);
     });
 
+    // Summary Box bleibt gleich...
     const summaryBox = document.createElement("div");
     summaryBox.classList.add("screen", "rating-box");
     summaryBox.innerHTML = `
@@ -368,6 +411,7 @@ function createVideoElements() {
     `;
     container.appendChild(summaryBox);
 }
+
 
 // Rest des Codes bleibt gleich...
 let currentIndex = 0;
