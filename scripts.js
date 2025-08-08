@@ -12,10 +12,10 @@ const regularVideos = [
     { id: 7, src: "SOMA_audio_DRUGS.mp4" },
     { id: 8, src: "SOMA_audio_everydayheroes.mp4" },
     { id: 9, src: "SOMA_audio_LAUNDRY.mp4" },
-    { id: 10, src: "Soma_audio_MENTALHEALTH.mp4" },
+    { id: 10, src: "SOMA_audio_MENTALHEALTH.mp4" },
     { id: 11, src: "SOMA_audio_Möbel.mp4" },
     { id: 12, src: "SOMA_audio_READING.mp4" },
-    { id: 13, src: "SOMA_audio_RENT.mp4" }, // Error behoben
+    { id: 13, src: "SOMA_audio_RENT.mp4" },
     { id: 14, src: "SOMA_audio_SPORTDRINK.mp4" },
     { id: 15, src: "SOMA_audio_sportshoe.mp4" },
     { id: 16, src: "SOMA_audio_tea.mp4" },
@@ -32,64 +32,109 @@ function shuffleArray(array) {
     }
 }
 
-// Verbesserte Promise-basierte Preload-Funktion
+// Globaler Video-Cache
+const videoCache = new Map();
+
+// Verbesserte Preload-Funktion mit Blob-Caching
 function preloadVideo(video) {
     return new Promise((resolve, reject) => {
-        const tempVideo = document.createElement('video');
-        tempVideo.src = video.src;
-        tempVideo.preload = 'auto';
-        tempVideo.muted = true;
-        tempVideo.playsInline = true;
-        tempVideo.style.display = 'none';
+        console.log(`🔄 Starting preload: ${video.src}`);
         
-        // Timeout nach 30 Sekunden
-        const timeout = setTimeout(() => {
-            document.body.removeChild(tempVideo);
-            reject(new Error(`Timeout loading ${video.src}`));
-        }, 30000);
-        
-        tempVideo.oncanplaythrough = () => {
-            clearTimeout(timeout);
-            document.body.removeChild(tempVideo);
-            console.log(`✅ Preloaded: ${video.src}`);
-            resolve(video);
-        };
-        
-        tempVideo.onerror = () => {
-            clearTimeout(timeout);
-            document.body.removeChild(tempVideo);
-            console.error(`❌ Failed to load: ${video.src}`);
-            reject(new Error(`Failed to load ${video.src}`));
-        };
-        
-        document.body.appendChild(tempVideo);
-        tempVideo.load();
+        // Fetch als Blob für besseres Caching
+        fetch(video.src)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                // Blob-URL erstellen und im Cache speichern
+                const blobUrl = URL.createObjectURL(blob);
+                videoCache.set(video.id, {
+                    originalSrc: video.src,
+                    blobUrl: blobUrl,
+                    blob: blob
+                });
+                
+                // Video-Element erstellen um sicherzustellen dass es abspielbar ist
+                const testVideo = document.createElement('video');
+                testVideo.src = blobUrl;
+                testVideo.preload = 'auto';
+                testVideo.muted = true;
+                testVideo.playsInline = true;
+                testVideo.style.display = 'none';
+                
+                const timeout = setTimeout(() => {
+                    document.body.removeChild(testVideo);
+                    reject(new Error(`Timeout testing ${video.src}`));
+                }, 15000);
+                
+                testVideo.oncanplaythrough = () => {
+                    clearTimeout(timeout);
+                    document.body.removeChild(testVideo);
+                    console.log(`✅ Preloaded and cached: ${video.src} (${(blob.size / 1024 / 1024).toFixed(2)} MB)`);
+                    resolve(video);
+                };
+                
+                testVideo.onerror = (e) => {
+                    clearTimeout(timeout);
+                    document.body.removeChild(testVideo);
+                    console.error(`❌ Video test failed: ${video.src}`, e);
+                    reject(new Error(`Video test failed: ${video.src}`));
+                };
+                
+                document.body.appendChild(testVideo);
+                testVideo.load();
+            })
+            .catch(error => {
+                console.error(`❌ Failed to fetch ${video.src}:`, error);
+                reject(error);
+            });
     });
 }
 
-// Alle Videos preloaden
+// Alle Videos preloaden mit Progress-Updates
 async function preloadAllVideos(videoList) {
     console.log("🔄 Starting to preload all videos...");
     
-    // Loading-Screen anzeigen
-    showLoadingScreen();
-    
-    const results = await Promise.allSettled(
-        videoList.map(video => preloadVideo(video))
-    );
+    const loadingScreen = showLoadingScreen();
     
     let loadedCount = 0;
-    let failedCount = 0;
+    const totalCount = videoList.length;
     
-    results.forEach((result, index) => {
-        if (result.status === 'fulfilled') {
-            loadedCount++;
-        } else {
-            failedCount++;
-            console.warn(`⚠️ Video failed to preload: ${videoList[index].src}`, result.reason);
+    // Update Progress Function
+    function updateProgress() {
+        const progressPercent = Math.round((loadedCount / totalCount) * 100);
+        const progressElement = document.getElementById('loadingProgress');
+        const progressText = document.getElementById('loadingText');
+        if (progressElement) {
+            progressElement.textContent = `${loadedCount}/${totalCount} Videos loaded (${progressPercent}%)`;
         }
-    });
+        if (progressText) {
+            progressText.textContent = `Loading video ${loadedCount + 1} of ${totalCount}...`;
+        }
+    }
     
+    // Videos einzeln laden für bessere Kontrolle
+    const results = [];
+    for (let i = 0; i < videoList.length; i++) {
+        const video = videoList[i];
+        updateProgress();
+        
+        try {
+            await preloadVideo(video);
+            results.push({ status: 'fulfilled', value: video });
+            loadedCount++;
+        } catch (error) {
+            console.warn(`⚠️ Video failed to preload: ${video.src}`, error);
+            results.push({ status: 'rejected', reason: error });
+        }
+    }
+    
+    updateProgress();
+    
+    const failedCount = results.filter(r => r.status === 'rejected').length;
     console.log(`✅ Preloading complete: ${loadedCount} loaded, ${failedCount} failed`);
     
     // Loading-Screen verstecken
@@ -98,7 +143,7 @@ async function preloadAllVideos(videoList) {
     return { loadedCount, failedCount };
 }
 
-// Loading-Screen Funktionen
+// Verbesserter Loading-Screen mit Progress
 function showLoadingScreen() {
     const loadingScreen = document.createElement('div');
     loadingScreen.id = 'loadingScreen';
@@ -116,11 +161,13 @@ function showLoadingScreen() {
         align-items: center;
         z-index: 9999;
         font-family: Arial, sans-serif;
+        text-align: center;
     `;
     
     loadingScreen.innerHTML = `
         <div style="font-size: 24px; margin-bottom: 20px;">Loading Videos...</div>
-        <div style="font-size: 16px; opacity: 0.7;">Please wait while all videos are being loaded</div>
+        <div id="loadingText" style="font-size: 16px; opacity: 0.7; margin-bottom: 10px;">Starting...</div>
+        <div id="loadingProgress" style="font-size: 14px; opacity: 0.5; margin-bottom: 20px;">0/0 Videos loaded</div>
         <div style="margin-top: 20px;">
             <div class="spinner" style="
                 border: 4px solid #f3f3f3;
@@ -131,9 +178,11 @@ function showLoadingScreen() {
                 animation: spin 1s linear infinite;
             "></div>
         </div>
+        <div style="margin-top: 20px; font-size: 12px; opacity: 0.6;">
+            Please wait, this may take a while with slow internet...
+        </div>
     `;
     
-    // CSS Animation hinzufügen
     const style = document.createElement('style');
     style.textContent = `
         @keyframes spin {
@@ -144,6 +193,7 @@ function showLoadingScreen() {
     document.head.appendChild(style);
     
     document.body.appendChild(loadingScreen);
+    return loadingScreen;
 }
 
 function hideLoadingScreen() {
@@ -153,30 +203,21 @@ function hideLoadingScreen() {
     }
 }
 
-// Shuffle und Video-Array erstellen
 shuffleArray(regularVideos);
 const videos = [tutorialVideo, ...regularVideos];
 
-// Container definieren (wird später verwendet)
 const container = document.getElementById('videoContainer');
 const videoViewingDurations = {};
 
-// Hauptfunktion die alles initialisiert
 async function initializeApp() {
     try {
-        // Alle Videos preloaden
         await preloadAllVideos(videos);
-        
-        // Nach erfolgreichem Preloading die App initialisieren
         createVideoElements();
         initializeEventListeners();
-        
-        console.log("🎉 App fully initialized!");
-        
+        console.log("🎉 App fully initialized with cached videos!");
     } catch (error) {
         console.error("❌ Failed to initialize app:", error);
         alert("Some videos failed to load. The app may not work properly.");
-        // Trotzdem fortfahren
         createVideoElements();
         initializeEventListeners();
     }
@@ -189,12 +230,17 @@ function createVideoElements() {
         const videoBox = document.createElement("div");
         videoBox.classList.add("screen", "video-box");
         videoBox.setAttribute("data-video-id", video.id);
+        
+        // Verwende Blob-URL falls verfügbar, sonst Original-URL
+        const cachedVideo = videoCache.get(video.id);
+        const videoSrc = cachedVideo ? cachedVideo.blobUrl : video.src;
+        
         videoBox.innerHTML = `
-      <div class="video-loading-spinner" style="display: none;"></div>
-      <video loop playsinline preload="auto">
-        <source src="${video.src}" type="video/mp4">
-      </video>
-    `;
+            <div class="video-loading-spinner" style="display: none;"></div>
+            <video loop playsinline preload="auto">
+                <source src="${videoSrc}" type="video/mp4">
+            </video>
+        `;
         container.appendChild(videoBox);
 
         const ratingBox = document.createElement("div");
@@ -213,7 +259,33 @@ function createVideoElements() {
           <div class="rating-text"> </div>
           <div class="rating-text"> </div>
 
-          <div class="rating-text">How much do you feel adressed?</div>
+          <div class="rating-text">How much do you feel addressed?</div>
+          <div class="stars" data-question="addressedRating">
+            <span class="star" data-value="1">★</span>
+            <span class="star" data-value="2">★</span>
+            <span class="star" data-value="3">★</span>
+            <span class="star" data-value="4">★</span>
+            <span class="star" data-value="5">★</span>
+          </div>
+
+          <div class="rating-text"> </div>
+          <div class="rating-text"> </div>
+          <div class="rating-text"> </div>
+
+          <div class="rating-text">How much did you like the video?</div>
+          <div class="stars" data-question="likeRating">
+            <span class="star" data-value="1">★</span>
+            <span class="star" data-value="2">★</span>
+            <span class="star" data-value="3">★</span>
+            <span class="star" data-value="4">★</span>
+            <span class="star" data-value="5">★</span>
+          </div>
+
+          <div class="rating-text"> </div>
+          <div class="rating-text"> </div>
+          <div class="rating-text"> </div>
+
+          <div class="rating-text">How likely are you to buy the product/change your behavior?</div>
           <div class="stars" data-question="purchaseLikelihood">
             <span class="star" data-value="1">★</span>
             <span class="star" data-value="2">★</span>
@@ -227,6 +299,25 @@ function createVideoElements() {
         const videoElement = videoBox.querySelector("video");
         videoElement.muted = false;
 
+        // Verbesserte Video-Loading-Behandlung
+        const spinner = videoBox.querySelector(".video-loading-spinner");
+        
+        videoElement.addEventListener("loadstart", () => {
+            if (spinner) spinner.style.display = "block";
+        });
+        
+        videoElement.addEventListener("canplaythrough", () => {
+            if (spinner) spinner.style.display = "none";
+        });
+        
+        videoElement.addEventListener("error", (e) => {
+            console.error(`Video playback error for ${video.src}:`, e);
+            if (spinner) {
+                spinner.innerHTML = "⚠️ Video error";
+                spinner.style.color = "red";
+            }
+        });
+
         const observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach(entry => {
@@ -234,9 +325,19 @@ function createVideoElements() {
                         const currentVideoId = videoElement.closest('.video-box').getAttribute('data-video-id');
 
                         if (entry.isIntersecting) {
-                            videoElement.play().catch(e => {
-                                console.error(`Play failed for video ${currentVideoId}:`, e);
-                            });
+                            // Warten bis Video bereit ist
+                            if (videoElement.readyState >= 3) {
+                                videoElement.play().catch(e => {
+                                    console.error(`Play failed for video ${currentVideoId}:`, e);
+                                });
+                            } else {
+                                videoElement.addEventListener('canplay', () => {
+                                    videoElement.play().catch(e => {
+                                        console.error(`Play failed for video ${currentVideoId}:`, e);
+                                    });
+                                }, { once: true });
+                            }
+                            
                             if (videoViewingDurations[currentVideoId] && !videoViewingDurations[currentVideoId].lastStartTime) {
                                 videoViewingDurations[currentVideoId].lastStartTime = Date.now();
                             }
@@ -257,7 +358,6 @@ function createVideoElements() {
         observer.observe(videoElement);
     });
 
-    // Summary Box hinzufügen
     const summaryBox = document.createElement("div");
     summaryBox.classList.add("screen", "rating-box");
     summaryBox.innerHTML = `
@@ -269,7 +369,7 @@ function createVideoElements() {
     container.appendChild(summaryBox);
 }
 
-// Der Rest deiner Event Listeners und Funktionen bleibt gleich
+// Rest des Codes bleibt gleich...
 let currentIndex = 0;
 let screens;
 const ratings = {};
@@ -277,7 +377,6 @@ const ratings = {};
 function initializeEventListeners() {
     screens = document.querySelectorAll(".screen");
     
-    // Alle deine bestehenden Event Listeners hier...
     let touchStartY = 0;
     let touchEndY = 0;
     let swipeThreshold = 30;
@@ -345,7 +444,12 @@ function initializeEventListeners() {
                 });
 
                 if (!ratings[videoId]) {
-                    ratings[videoId] = { videoRating: null, purchaseLikelihood: null };
+                    ratings[videoId] = { 
+                        videoRating: null, 
+                        addressedRating: null, 
+                        likeRating: null, 
+                        purchaseLikelihood: null 
+                    };
                 }
 
                 ratings[videoId][questionType] = parseInt(ratingValue);
@@ -401,13 +505,18 @@ function logVideoEnd(index) {
 }
 
 function downloadCSV() {
-    const csvRows = ["Video ID,Video Rating,Purchase Likelihood,Viewing Duration (ms)"];
+    const csvRows = ["Video ID,Video Rating,Addressed Rating,Like Rating,Purchase Likelihood,Viewing Duration (ms)"];
     videos.forEach(video => {
         const videoId = video.id;
         const videoDesc = video.src;
-        const ratingData = ratings[videoId] || { videoRating: "N/A", purchaseLikelihood: "N/A" };
+        const ratingData = ratings[videoId] || { 
+            videoRating: "N/A", 
+            addressedRating: "N/A", 
+            likeRating: "N/A", 
+            purchaseLikelihood: "N/A" 
+        };
         const duration = videoViewingDurations[videoId] ? videoViewingDurations[videoId].totalDuration : 0;
-        csvRows.push(`${videoDesc};${ratingData.videoRating};${ratingData.purchaseLikelihood};${duration}`);
+        csvRows.push(`${videoDesc};${ratingData.videoRating};${ratingData.addressedRating};${ratingData.likeRating};${ratingData.purchaseLikelihood};${duration}`);
     });
 
     const blob = new Blob([csvRows.join("\n")], { type: 'text/csv' });
@@ -419,7 +528,9 @@ function downloadCSV() {
     URL.revokeObjectURL(url);
 }
 
+// Cleanup function für Blob-URLs
 window.addEventListener('beforeunload', () => {
+    // Video viewing duration tracking
     const videoElements = document.querySelectorAll('.video-box video');
     videoElements.forEach(videoElement => {
         const videoId = videoElement.closest('.video-box').getAttribute('data-video-id');
@@ -428,6 +539,11 @@ window.addEventListener('beforeunload', () => {
             videoViewingDurations[videoId].totalDuration += duration;
             videoViewingDurations[videoId].lastStartTime = null;
         }
+    });
+    
+    // Cleanup Blob-URLs
+    videoCache.forEach(cached => {
+        URL.revokeObjectURL(cached.blobUrl);
     });
 });
 
