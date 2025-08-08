@@ -371,9 +371,17 @@ function createVideoElements() {
     summaryBox.classList.add("screen", "rating-box");
     summaryBox.innerHTML = `
       <div class="rating-text">Thank you for rating all videos!</div>
+      
       <div></div>
-        <div class="rating-text">IMPORTANT: Download the answer file using the button below.</div>
+      
+      <div class="rating-text">IMPORTANT: Download the answer file using the button below.</div>
       <button class="download-btn">Download Ratings</button>
+      
+      <div></div>
+      
+      <div class="rating-text">If you have downloaded the file, click this link to access a short survey on the videos you just saw. After you answered this survey, you have completed the study.</div>
+      <div class="rating-text"><a href="https://uk-erlangen.limesurvey.net/SOMA_part2" target="_blank">Link to survey</a></div>
+
     `;
     container.appendChild(summaryBox);
 }
