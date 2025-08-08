@@ -1,5 +1,6 @@
 // Tutorial-Video als erstes definieren
 const tutorialVideo = { id: 0, src: "SOMA_tutorial.mp4" };
+let hasUserInteracted = false;
 
 // Die anderen Videos
 const regularVideos = [
@@ -239,22 +240,10 @@ function createVideoElements() {
             <video loop playsinline preload="auto" muted>
                 <source src="${videoSrc}" type="video/mp4">
             </video>
-            <div class="unmute-hint" style="
-                position: absolute; 
-                bottom: 20px; 
-                left: 20px; 
-                color: white; 
-                background: rgba(0,0,0,0.7); 
-                padding: 10px; 
-                border-radius: 5px; 
-                font-size: 14px;
-                display: none;
-                cursor: pointer;
-            ">🔇 Tap to enable sound</div>
         `;
         container.appendChild(videoBox);
 
-        // Rest der ratingBox bleibt gleich...
+        // Rating box code stays the same...
         const ratingBox = document.createElement("div");
         ratingBox.classList.add("screen", "rating-box");
         ratingBox.setAttribute("data-video-id", video.id);
@@ -309,10 +298,8 @@ function createVideoElements() {
         container.appendChild(ratingBox);
 
         const videoElement = videoBox.querySelector("video");
-        const unmuteHint = videoBox.querySelector(".unmute-hint");
         const spinner = videoBox.querySelector(".video-loading-spinner");
         
-        // Verbesserte Event-Listeners
         videoElement.addEventListener("loadstart", () => {
             if (spinner) spinner.style.display = "block";
         });
@@ -329,18 +316,6 @@ function createVideoElements() {
             }
         });
 
-        // Click-to-unmute functionality
-        let hasUserInteracted = false;
-        
-        function enableSound() {
-            videoElement.muted = false;
-            hasUserInteracted = true;
-            if (unmuteHint) unmuteHint.style.display = "none";
-        }
-        
-        videoBox.addEventListener('click', enableSound);
-        unmuteHint.addEventListener('click', enableSound);
-
         const observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach(entry => {
@@ -348,21 +323,15 @@ function createVideoElements() {
                         const currentVideoId = videoElement.closest('.video-box').getAttribute('data-video-id');
 
                         if (entry.isIntersecting) {
-                            // Zeige Unmute-Hint wenn nötig
-                            if (!hasUserInteracted && unmuteHint) {
-                                unmuteHint.style.display = "block";
-                                setTimeout(() => {
-                                    if (unmuteHint && unmuteHint.style.display === "block") {
-                                        unmuteHint.style.display = "none";
-                                    }
-                                }, 3000);
-                            }
-                            
-                            // Video abspielen (stumm oder mit Ton je nach User-Interaktion)
                             const playVideo = () => {
+                                // Enable sound when video comes into view (after user interaction)
+                                if (hasUserInteracted) {
+                                    videoElement.muted = false;
+                                }
+                                
                                 videoElement.play().catch(e => {
                                     console.error(`Play failed for video ${currentVideoId}:`, e);
-                                    // Bei Autoplay-Error, erneut stumm versuchen
+                                    // Fallback to muted if audio play fails
                                     if (!videoElement.muted) {
                                         videoElement.muted = true;
                                         videoElement.play().catch(err => {
@@ -383,8 +352,6 @@ function createVideoElements() {
                             }
                         } else {
                             videoElement.pause();
-                            if (unmuteHint) unmuteHint.style.display = "none";
-                            
                             if (videoViewingDurations[currentVideoId] && videoViewingDurations[currentVideoId].lastStartTime) {
                                 const duration = Date.now() - videoViewingDurations[currentVideoId].lastStartTime;
                                 videoViewingDurations[currentVideoId].totalDuration += duration;
@@ -400,7 +367,6 @@ function createVideoElements() {
         observer.observe(videoElement);
     });
 
-    // Summary Box bleibt gleich...
     const summaryBox = document.createElement("div");
     summaryBox.classList.add("screen", "rating-box");
     summaryBox.innerHTML = `
@@ -413,10 +379,12 @@ function createVideoElements() {
 }
 
 
+
 // Rest des Codes bleibt gleich...
 let currentIndex = 0;
 let screens;
 const ratings = {};
+
 
 function initializeEventListeners() {
     screens = document.querySelectorAll(".screen");
@@ -462,9 +430,11 @@ function initializeEventListeners() {
 
         if (e.deltaY > SCROLL_THRESHOLD) {
             isScrolling = true;
+            markUserInteracted(); // Mark interaction on scroll
             scrollToNext();
         } else if (e.deltaY < -SCROLL_THRESHOLD) {
             isScrolling = true;
+            markUserInteracted(); // Mark interaction on scroll
             scrollToPrevious();
         }
 
@@ -474,8 +444,11 @@ function initializeEventListeners() {
         }, 800);
     }, { passive: false });
 
+    // Star rating listeners remain the same...
     document.addEventListener("click", (event) => {
         if (event.target.classList.contains("star")) {
+            markUserInteracted(); // Mark interaction on click
+            
             const starContainer = event.target.parentElement;
             const ratingValue = event.target.getAttribute("data-value");
             const ratingBox = starContainer.closest(".rating-box");
@@ -510,10 +483,30 @@ function initializeEventListeners() {
     function handleSwipeGesture() {
         const swipeDistance = touchStartY - touchEndY;
         if (Math.abs(swipeDistance) > swipeThreshold) {
+            markUserInteracted(); // Mark interaction on swipe
+            
             if (swipeDistance > 0) {
                 scrollToNext();
             } else {
                 scrollToPrevious();
+            }
+        }
+    }
+    
+    // Function to mark user interaction and enable sound for current video
+    function markUserInteracted() {
+        if (!hasUserInteracted) {
+            hasUserInteracted = true;
+            console.log("🔊 User interaction detected - sound enabled for future videos");
+            
+            // Enable sound for currently playing video if any
+            const currentScreen = screens[currentIndex];
+            if (currentScreen && currentScreen.classList.contains('video-box')) {
+                const currentVideo = currentScreen.querySelector('video');
+                if (currentVideo && !currentVideo.paused) {
+                    currentVideo.muted = false;
+                    console.log("🔊 Sound enabled for current video");
+                }
             }
         }
     }
