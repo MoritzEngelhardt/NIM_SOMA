@@ -14,15 +14,16 @@ const regularVideos = [
     { id: 8, src: "SOMA_audio_everydayheroes.mp4" },
     { id: 9, src: "SOMA_audio_LAUNDRY.mp4" },
     { id: 10, src: "SOMA_audio_MENTALHEALTH.mp4" },
-    { id: 11, src: "SOMA_audio_Möbel.mp4" },
-    { id: 12, src: "SOMA_audio_READING.mp4" },
-    { id: 13, src: "SOMA_audio_RENT.mp4" },
-    { id: 14, src: "SOMA_audio_SPORTDRINK.mp4" },
-    { id: 15, src: "SOMA_audio_sportshoe.mp4" },
-    { id: 16, src: "SOMA_audio_tea.mp4" },
-    { id: 17, src: "SOMA_audio_vacation.mp4" },
-    { id: 19, src: "SOMA_audio_VR.mp4" },
-    { id: 20, src: "SOMA_audio_applejuice.mp4" },
+    { id: 11, src: "SOMA_noau_Möbel.mp4" },
+    { id: 12, src: "SOMA_noau_READING.mp4" },
+    { id: 13, src: "SOMA_noau_RENT.mp4" },
+    { id: 14, src: "SOMA_noau_SPORTDRINK.mp4" },
+    { id: 15, src: "SOMA_noau_sportshoe.mp4" },
+    { id: 16, src: "SOMA_noau_tea.mp4" },
+    { id: 17, src: "SOMA_noau_vacation.mp4" },
+    { id: 18, src: "SOMA_noau_VeganBBQ.mp4" },
+    { id: 19, src: "SOMA_noau_VR.mp4" },
+    { id: 20, src: "SOMA_noau_applejuice.mp4" },
     { id: 21, src: "SOMA_check.mp4"}
 ];
 
@@ -251,7 +252,7 @@ function createVideoElements() {
 
 
           <div class="rating-text">How much did you like the video?</div>
-          <div class="stars" data-question="likeRating">
+          <div class="stars" data-question="likeVideoRating">
             <span class="star" data-value="1">★</span>
             <span class="star" data-value="2">★</span>
             <span class="star" data-value="3">★</span>
@@ -277,7 +278,7 @@ function createVideoElements() {
           <div class="rating-text"> </div>
 
         <div class="rating-text">How much did you like the advertised product/behavior?</div>
-          <div class="stars" data-question="likeRating">
+          <div class="stars" data-question="likeProductRating">
             <span class="star" data-value="1">★</span>
             <span class="star" data-value="2">★</span>
             <span class="star" data-value="3">★</span>
@@ -473,9 +474,9 @@ function initializeEventListeners() {
 
                 if (!ratings[videoId]) {
                     ratings[videoId] = { 
-                        videoRating: null, 
+                        likeVideoRating: null, 
                         addressedRating: null, 
-                        likeRating: null, 
+                        likeProductRating: null, 
                         purchaseLikelihood: null 
                     };
                 }
@@ -553,18 +554,18 @@ function logVideoEnd(index) {
 }
 
 function downloadCSV() {
-    const csvRows = ["Video ID,Video Rating,Addressed Rating,Like Rating,Purchase Likelihood,Viewing Duration (ms)"];
+    const csvRows = ["Video ID,Like Video Rating,Addressed Rating,Like Product Rating,Purchase Likelihood,Viewing Duration (ms)"]; // ← Korrigiert!
     videos.forEach(video => {
         const videoId = video.id;
         const videoDesc = video.src;
         const ratingData = ratings[videoId] || { 
-            videoRating: "N/A", 
+            likeVideoRating: "N/A", 
             addressedRating: "N/A", 
-            likeRating: "N/A", 
+            likeProductRating: "N/A", 
             purchaseLikelihood: "N/A" 
         };
         const duration = videoViewingDurations[videoId] ? videoViewingDurations[videoId].totalDuration : 0;
-        csvRows.push(`${videoDesc};${ratingData.videoRating};${ratingData.addressedRating};${ratingData.likeRating};${ratingData.purchaseLikelihood};${duration}`);
+        csvRows.push(`${videoDesc};${ratingData.likeVideoRating};${ratingData.addressedRating};${ratingData.likeProductRating};${ratingData.purchaseLikelihood};${duration}`);
     });
 
     const blob = new Blob([csvRows.join("\n")], { type: 'text/csv' });
@@ -575,6 +576,7 @@ function downloadCSV() {
     link.click();
     URL.revokeObjectURL(url);
 }
+
 
 // Cleanup function für Blob-URLs
 window.addEventListener('beforeunload', () => {
