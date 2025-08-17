@@ -248,19 +248,22 @@ function createVideoElements() {
         ratingBox.classList.add("screen", "rating-box");
         ratingBox.setAttribute("data-video-id", video.id);
         ratingBox.innerHTML = `
-          <div class="rating-text">Video quality?</div>
-          <div class="stars" data-question="videoRating">
+
+
+          <div class="rating-text">How much did you like the video?</div>
+          <div class="stars" data-question="likeRating">
             <span class="star" data-value="1">★</span>
             <span class="star" data-value="2">★</span>
             <span class="star" data-value="3">★</span>
             <span class="star" data-value="4">★</span>
             <span class="star" data-value="5">★</span>
           </div>
+
           <div class="rating-text"> </div>
           <div class="rating-text"> </div>
           <div class="rating-text"> </div>
 
-          <div class="rating-text">How much do you feel addressed?</div>
+                    <div class="rating-text">How much do you feel addressed by the advertisement?</div>
           <div class="stars" data-question="addressedRating">
             <span class="star" data-value="1">★</span>
             <span class="star" data-value="2">★</span>
@@ -273,7 +276,7 @@ function createVideoElements() {
           <div class="rating-text"> </div>
           <div class="rating-text"> </div>
 
-          <div class="rating-text">How much did you like the video?</div>
+        <div class="rating-text">How much did you like the advertised product/behavior?</div>
           <div class="stars" data-question="likeRating">
             <span class="star" data-value="1">★</span>
             <span class="star" data-value="2">★</span>
