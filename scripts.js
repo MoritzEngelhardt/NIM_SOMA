@@ -378,7 +378,7 @@ function createVideoElements() {
       
       <div></div>
       
-      <div class="rating-text">IMPORTANT: Download the answer file using the button below.</div>
+      <div class="rating-text">IMPORTANT: Download the answer file using the button below. Save it at a place where you can find it later.</div>
       <button class="download-btn">Download Ratings</button>
       
       <div></div>
